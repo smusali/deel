@@ -9,9 +9,10 @@
     "sqlite3": "^4.0.1"
   },
   "scripts": {
+    "clean": "rm -rf .nyc_output/ node_modules/ database.sqlite3",
     "lint": "eslint .",
     "lint-fix": "eslint --fix .",
-    "pretest": "npm run lint",
+    "pretest": "npm run seed && npm run lint",
     "start": "nodemon ./src/server.js",
     "seed": "node ./scripts/seedDb.js",
     "test": "tap"

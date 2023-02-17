@@ -10,19 +10,15 @@ This backend exercise involves building a Node.js/Express.js app that will serve
 
 ### Profile
 
-A profile can be either a `client` or a `contractor`.
-clients create contracts with contractors. contractor does jobs for clients and get paid.
-Each profile has a balance property.
+A profile can be either a `client` or a `contractor`. Clients create contracts with contractors. contractor does jobs for clients and get paid. Each profile has a balance property.
 
 ### Contract
 
-A contract between and client and a contractor.
-Contracts have 3 statuses, `new`, `in_progress`, `terminated`. contracts are considered active only when in status `in_progress`
-Contracts group jobs within them.
+A contract between and client and a contractor. Contracts have 3 statuses, `new`, `in_progress`, `terminated`. Contracts are considered active only when their statuses are `in_progress`. Contracts group jobs within them.
 
 ### Job
 
-contractor get paid for jobs by clients under a certain contract.
+Contractor get paid for jobs by clients under a certain contract.
 
 ## Getting Set Up
 
