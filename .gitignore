@@ -1,3 +1,11 @@
+# NPM Install Artefacts
 node_modules
+
+# Local Artefacts
 .DS_STORE
+
+# DB Artefacts
 database.sqlite3
+
+# Test Artefacts
+.nyc_output/
