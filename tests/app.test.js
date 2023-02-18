@@ -117,6 +117,18 @@ test('GET /jobs/unpaid with valid profile but no non-terminated contract', t => 
     })
 })
 
+test('GET /jobs/unpaid with valid profile but no jobs', t => {
+  request(app)
+    .get('/jobs/unpaid')
+    .set('profile_id', 9)
+    .expect(404)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
 test('POST /jobs/:job_id/pay with invalid profile', t => {
   request(app)
     .post('/jobs/3/pay')
@@ -142,7 +154,7 @@ test('POST /jobs/:job_id/pay with valid profile but wrong job', t => {
 
 test('POST /jobs/:job_id/pay with insufficient balance', t => {
   request(app)
-    .post('/jobs/14/pay')
+    .post('/jobs/15/pay')
     .set('profile_id', 2)
     .expect(403)
     .end((error, res) => {
@@ -156,20 +168,16 @@ test('POST /jobs/:job_id/pay with insufficient balance', t => {
 
 test('POST /jobs/:job_id/pay with successful payment', t => {
   request(app)
-    .post('/jobs/2/pay')
+    .post('/jobs/3/pay')
     .set('profile_id', 2)
     .expect(200)
     .end((error, res) => {
       t.error(error, 'No error')
       t.ok(res.body, 'Response body should exist')
-      t.ok(res.body.job, 'Paid job should exist')
-      t.ok(res.body.contract, 'Corresponding contract should exist')
-      t.ok(res.body.profile, 'Payer should exist')
-      t.ok(res.body.job.id, 'Paid job should contain the ID')
-      t.ok(res.body.contract.id, 'Corresponding contract should contain the ID')
-      t.ok(res.body.profile.id, 'Payer should contain the ID')
-      t.equal(res.body.job.id, 2, 'Paid job should contain the correct job ID')
-      t.equal(res.body.profile.id, 2, 'Payer should contain the profile ID')
+      t.ok(res.body.id, 'Response body should contain the ID')
+      t.ok(res.body.paid, 'Response body should contain the payment status')
+      t.equal(res.body.id, 3, 'Response body should contain the correct job ID')
+      t.equal(res.body.paid, true, 'Response body should contain the correct job payment status')
       t.end()
     })
 })

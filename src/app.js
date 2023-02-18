@@ -63,62 +63,62 @@ app.get('/jobs/unpaid', getProfile, async (req, res) => {
       status: {
         [Op.not]: 'terminated'
       }
-    }
+    },
+    include: [{
+      model: Job
+    }]
   })
 
-  const unpaidJobs = await Job.findAll({
-    where: {
-      ContractId: {
-        [Op.in]: [...new Set(contracts.map(contract => contract && contract.id))]
-      },
-      paid: false
-    }
+  if (!contracts || contracts.length === 0) return res.status(404).end()
+  const unpaidJobs = []
+  contracts.forEach((contract) => {
+    contract.Jobs && contract.Jobs.forEach((job) => {
+      if (!job.paid) unpaidJobs.push(job)
+    })
   })
 
-  if (!unpaidJobs || unpaidJobs.length === 0) return res.status(404).end()
+  if (unpaidJobs.length === 0) return res.status(404).end()
   return res.json(unpaidJobs)
 })
 
 app.post('/jobs/:job_id/pay', getProfile, async (req, res) => {
-  const { Contract, Job } = req && req.app && req.app.get('models')
+  const { Contract, Job, Profile } = req && req.app && req.app.get('models')
   const jobID = req && req.params && req.params.job_id
-  let profile = req && req.profile
+  const profile = req && req.profile
 
-  const contracts = await Contract.findAll({
+  const job = await Job.findOne({
     where: {
-      ClientId: profile.id
-    }
-  })
-
-  let job2Pay = await Job.findOne({
-    where: {
-      ContractId: {
-        [Op.in]: [...new Set(contracts.map(contract => contract && contract.id))]
-      },
       id: jobID,
-      paid: false
-    }
+      '$Contract.ClientId$': profile.id
+    },
+    include: [{
+      model: Contract,
+      include: [{
+        as: 'Contractor',
+        model: Profile
+      }]
+    }]
   })
 
-  if (!job2Pay) return res.status(404).end()
-  if (!profile.balance || job2Pay.price > profile.balance) {
+  if (!job || job.paid) return res.status(404).end()
+  if (!profile.balance || job.price > profile.balance) {
     return res.status(403).json({
       message: 'Insufficient Balance'
     })
   }
 
-  job2Pay = await job2Pay.update({ paid: true })
-  profile = await profile.update({ balance: profile.balance - job2Pay.price })
-  let contract = contracts.filter(contract => contract.id === job2Pay.ContractId)[0]
-  contract = await contract.update({
-    balance: (contract.balance || 0) + job2Pay.price
-  })
+  const amount = job.price
+  job.Contract.Contractor.balance += amount
+  profile.balance += amount
 
-  return res.json({
-    contract,
-    job: job2Pay,
-    profile
-  })
+  job.paid = true
+  job.paymentDate = new Date()
+
+  await job.save()
+  await job.Contract.Contractor.save()
+  await profile.save()
+
+  return res.json(job)
 })
 
 module.exports = app
