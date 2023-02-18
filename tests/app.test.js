@@ -181,3 +181,342 @@ test('POST /jobs/:job_id/pay with successful payment', t => {
       t.end()
     })
 })
+
+test('POST /balances/deposit/:userId with invalid userId', t => {
+  request(app)
+    .post('/balances/deposit/smusali')
+    .set('profile_id', 5)
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid User ID Format'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with unauthorized access', t => {
+  request(app)
+    .post('/balances/deposit/1')
+    .set('profile_id', 2)
+    .expect(401)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with contractor access', t => {
+  request(app)
+    .post('/balances/deposit/5')
+    .set('profile_id', 5)
+    .expect(403)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Only clients can deposit money'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with invalid amount', t => {
+  request(app)
+    .post('/balances/deposit/1')
+    .set('profile_id', 1)
+    .send({ amount: '0' })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid Amount'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with no contract', t => {
+  request(app)
+    .post('/balances/deposit/10')
+    .set('profile_id', 10)
+    .send({ amount: '0' })
+    .expect(404)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with higher amount', t => {
+  request(app)
+    .post('/balances/deposit/1')
+    .set('profile_id', 1)
+    .send({ amount: 125 })
+    .expect(403)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.ok(res.body.message, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('POST /balances/deposit/:userId with perfect amount', t => {
+  request(app)
+    .post('/balances/deposit/1')
+    .set('profile_id', 1)
+    .send({ amount: 100 })
+    .expect(200)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.ok(res.body.balance, 'Response body should contain balance')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with unauthorized access', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', 2)
+    .expect(401)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with no start date', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Start date is absent'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with invalid start date', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .query({
+      start: 'smusali'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid Start Date'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with no end date', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .query({
+      start: '0'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'End date is absent'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with invalid end date', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .query({
+      start: '0',
+      end: 'smusali'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid End Date'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession with no job', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .query({
+      start: '0',
+      end: '1'
+    })
+    .expect(404)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
+test('GET /admin/best-profession from the beginning', t => {
+  request(app)
+    .get('/admin/best-profession')
+    .set('profile_id', -1)
+    .query({
+      start: '0',
+      end: `${(new Date()).getTime()}`
+    })
+    .expect(200)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.ok(res.body.bestProfession, 'Response body should contain bestProfession')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with unauthorized access', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', 2)
+    .expect(401)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(Object.keys(res.body), [], 'Response body should be empty')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with no start date', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Start date is absent'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with invalid start date', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      start: 'smusali'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid Start Date'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with no end date', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      start: '0'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'End date is absent'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with invalid end date', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      start: '0',
+      end: 'smusali'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Invalid End Date'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with invalid limit', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      limit: 'smusali',
+      start: '0',
+      end: '2'
+    })
+    .expect(400)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.deepEqual(res.body, {
+        message: 'Limit should be >= 0'
+      }, 'Response body should contain message')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients without limit', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      start: '0',
+      end: `${(new Date()).getTime()}`
+    })
+    .expect(200)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.equal(res.body.length, 2, 'Response body should contain 3 items')
+      t.end()
+    })
+})
+
+test('GET /admin/best-clients with a valid limit', t => {
+  request(app)
+    .get('/admin/best-clients')
+    .set('profile_id', -1)
+    .query({
+      limit: '3',
+      start: '0',
+      end: `${(new Date()).getTime()}`
+    })
+    .expect(200)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.equal(res.body.length, 3, 'Response body should contain 3 items')
+      t.end()
+    })
+})

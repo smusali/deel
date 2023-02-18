@@ -11,6 +11,14 @@ async function seed () {
   // insert data
   await Promise.all([
     Profile.create({
+      id: -1,
+      firstName: 'Workspace',
+      lastName: 'Admin',
+      profession: 'Admin',
+      balance: 0,
+      type: 'admin'
+    }),
+    Profile.create({
       id: 1,
       firstName: 'Harry',
       lastName: 'Potter',
@@ -77,6 +85,14 @@ async function seed () {
     Profile.create({
       id: 9,
       firstName: 'Samir',
+      lastName: 'Musali',
+      profession: 'Programmer',
+      balance: 0,
+      type: 'client'
+    }),
+    Profile.create({
+      id: 10,
+      firstName: 'Adil',
       lastName: 'Musali',
       profession: 'Programmer',
       balance: 0,
