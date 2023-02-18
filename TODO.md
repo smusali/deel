@@ -1,0 +1,5 @@
+This package requires to go through several improvements. Some of them are the followings:
+1. **Modularization**: There is huge amount of repeated logic in the implementation of the endpoints which can be detached and encapsulated in separate libraries. In this way, we can create unit tests to just test the functionalities. This will increase the readability, cleanliness, and maintainability of the code.
+2. **Caching**: All of us know db calls are expensive; however, with the introduction of `Redis` or any other temporary memory storage for caching the results obtained from the `SQLite` will optimize the performance of the whole service.
+3. **Frontend**: Basic frontend can be build to interact with the API endpoints. In this way, it will be possible to visually experiment the API.
+4. **Try-Catch**: With the current seed data, the API endpoint implementation works but it hasn't covered edge cases such as `500: Server Errors`; most of the calls must be covered with `Try..Catch` calls.
