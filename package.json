@@ -1,7 +1,8 @@
 {
-  "name": "deel-task",
+  "name": "deel",
   "version": "0.1.0",
-  "private": true,
+  "description": "Mini Backend Version of Contractor Platform",
+  "private": false,
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.18.2",
@@ -28,8 +29,35 @@
     "supertest": "^6.3.3",
     "tap": "^16.3.4"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smusali/deel.git"
+  },
+  "author": "Samir Musali <mailto:samir.musali@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smusali/deel/issues"
+  },
+  "homepage": "https://github.com/smusali/deel#readme",
   "engines": {
     "node": ">=10.16.3"
   },
+  "keywords": [
+    "nodejs",
+    "javascript",
+    "api",
+    "client",
+    "contractor",
+    "express",
+    "orm",
+    "js",
+    "backend",
+    "job",
+    "sqlite",
+    "expressjs",
+    "sequelize",
+    "contract",
+    "sqlite3"
+  ],
   "engineStrict": true
 }
