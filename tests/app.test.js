@@ -520,3 +520,15 @@ test('GET /admin/best-clients with a valid limit', t => {
       t.end()
     })
 })
+
+test('GET /error Error handling', t => {
+  request(app)
+    .get('/error')
+    .expect(500)
+    .end((error, res) => {
+      t.error(error, 'No error')
+      t.ok(res.body, 'Response body should exist')
+      t.equal(res.body.error, 'Error', 'Response body should contain Error')
+      t.end()
+    })
+})

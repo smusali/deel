@@ -319,8 +319,13 @@ app.get('/admin/best-clients', getProfile, async (req, res) => {
     }
   }))
 })
+
+app.get('/error', () => {
+  throw new Error('Error')
+})
+
 app.use((error, req, res, next) => {
-  res.status(500).json({error: error.message})
+  res.status(500).json({ error: error.message })
 })
 
 module.exports = app
