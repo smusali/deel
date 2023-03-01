@@ -1,3 +1,4 @@
+require('express-async-errors')
 const express = require('express')
 const bodyParser = require('body-parser')
 const { sequelize } = require('./model')
@@ -317,6 +318,14 @@ app.get('/admin/best-clients', getProfile, async (req, res) => {
       paid: result.get('totalPaid')
     }
   }))
+})
+
+app.get('/error', () => {
+  throw new Error('Error')
+})
+
+app.use((error, req, res, next) => {
+  res.status(500).json({ error: error.message })
 })
 
 module.exports = app
